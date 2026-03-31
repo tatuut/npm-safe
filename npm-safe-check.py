@@ -60,7 +60,7 @@ PM_CONFIG = {
     "bun": {
         "install_cmds": {"install", "i", "add"},
         "lockfile": "bun.lock",
-        "dry_install": None,
+        "dry_install": ["bun", "install", "--lockfile-only"],
         "skip_dry_cmds": set(),
         "list_cmd": None,
         "value_flags": {"--registry", "--cwd"},

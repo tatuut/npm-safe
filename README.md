@@ -14,11 +14,11 @@
 |----|-------------|----------------|
 | **npm** | package-lock.json | ✓ `--package-lock-only` |
 | **pnpm** | pnpm-lock.yaml | ✓ `--lockfile-only` |
-| **bun** | bun.lock (JSONC, Bun 1.2+) | ✗（既存lockfileのみ） |
+| **bun** | bun.lock (JSONC, Bun 1.2+) | ✓ `--lockfile-only` |
 | **yarn** (Berry v2+) | yarn.lock | ✓ `--mode update-lockfile` |
 | **yarn** (Classic v1) | yarn.lock | ✗（既存lockfileのみ） |
 
-> bun と yarn v1 はlockfile-onlyモードがないため、推移的依存の事前チェックはスキップされる。既存のlockfileはチェックされる。
+> yarn v1 はlockfile-onlyモードがないため、推移的依存の事前チェックはスキップされる。既存のyarn.lockはチェックされる。
 
 ## 何をチェックするか
 
