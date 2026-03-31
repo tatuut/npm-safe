@@ -188,14 +188,6 @@ bun install を中止しました。
 | `npm-safe-check.py` | チェッカー本体。全PM のロックファイル解析・対話・推移的依存解決 |
 | `vuls.json` | 危険パッケージ定義。Python コードを触らずに追加・削除できる |
 
-### 旧ファイル（後方互換）
-
-| ファイル | 説明 |
-|---------|------|
-| `npm-safe.sh` | 旧 npm 専用 bash ラッパー。`safe.sh npm` で置き換え可能 |
-| `pnpm-safe.sh` | 旧 pnpm 専用 bash ラッパー。`safe.sh pnpm` で置き換え可能 |
-| `npm-safe.ps1` | 旧 npm 専用 PowerShell ラッパー。`safe.ps1 npm` で置き換え可能 |
-
 ## 危険パッケージの追加
 
 `vuls.json` を編集する（Python コードの変更は不要）:
