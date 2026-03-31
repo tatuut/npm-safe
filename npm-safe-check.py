@@ -2,6 +2,13 @@
 package.json / package-lock.json / pnpm-lock.yaml をチェックして
 危険パッケージが含まれていないか判定する。
 
+危険パッケージの定義は vuls.json から読み込む。
+
+3段階判定:
+  - dangerous → DANGER（ブロック、exit 1）
+  - safe → サイレント通過
+  - それ以外 → WARN（未確認バージョン、exit 2 → シェルで対話プロンプト）
+
 前提: Python 3.8+
 サードパーティパッケージ不要（json, sys, os, re, subprocess のみ使用）
 
@@ -15,34 +22,50 @@ import os
 import re
 import subprocess
 
-# === 危険パッケージ定義 ===
+# === 危険パッケージ定義を vuls.json から読み込み ===
 
-# 特定バージョンが危険（正規パッケージの侵害版）
-BLOCKED_EXACT = {
-    "axios": {"1.14.1", "0.30.4"},
-    "@solana/web3.js": {"1.95.6", "1.95.7"},
-    "@lottiefiles/lottie-player": {"2.0.8"},
-}
+def _load_vuls():
+    """vuls.json を読み込んで BLOCKED_EXACT, BLOCKED_ALL, SAFE_EXACT を構築する。"""
+    vuls_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vuls.json")
+    if not os.path.exists(vuls_path):
+        print(f"ERROR: {vuls_path} が見つかりません", file=sys.stderr)
+        sys.exit(2)
+    with open(vuls_path, encoding="utf-8") as f:
+        vuls = json.load(f)
 
-# 全バージョンが危険（タイポスクワッティング・完全偽装）
-BLOCKED_ALL = {
-    "axois", "axi0s", "solana-transaction-toolkit", "solana-stable-web-huks",
-    "crypto-encrypt-ts", "lottie-plyer", "loadsh", "expres", "reactjs-core",
-    "node-hide-console-windows", "eslint-plugin-prettier-format",
-    "prettier-plugin-xml2", "jest-cov-reporter", "event-handle-package",
-    "yolowide", "icloud-cod", "warbeast2000", "kodaborat", "bb-templates",
-}
+    blocked_exact = {}
+    safe_exact = {}
+    for name, info in vuls.get("exact", {}).items():
+        blocked_exact[name] = set(info.get("dangerous", info.get("versions", [])))
+        safe_exact[name] = set(info.get("safe", []))
 
-found = []
+    blocked_all = set(vuls.get("all", {}).keys())
+
+    return blocked_exact, blocked_all, safe_exact
+
+
+BLOCKED_EXACT, BLOCKED_ALL, SAFE_EXACT = _load_vuls()
+
+found_danger = []
+found_warn = []
 
 
 def _check_entry(source, name, ver):
     if not name:
         return
     if name in BLOCKED_ALL:
-        found.append(f"[{source}] {name}@{ver} (全バージョン危険)")
-    if name in BLOCKED_EXACT and ver in BLOCKED_EXACT[name]:
-        found.append(f"[{source}] {name}@{ver} (危険バージョン)")
+        found_danger.append(f"[{source}] {name}@{ver} (全バージョン危険)")
+        return
+    if name in BLOCKED_EXACT:
+        if ver in BLOCKED_EXACT[name]:
+            found_danger.append(f"[{source}] {name}@{ver} (危険バージョン)")
+        elif ver != "?" and ver != "*" and name in SAFE_EXACT:
+            if ver not in SAFE_EXACT[name]:
+                safe_list = ", ".join(sorted(SAFE_EXACT[name]))
+                found_warn.append(
+                    f"[{source}] {name}@{ver} (未確認バージョン。"
+                    f"安全確認済み: {safe_list})"
+                )
 
 
 def check_args(args):
@@ -79,11 +102,11 @@ def check_package_json(path):
     for section in ("dependencies", "devDependencies", "optionalDependencies"):
         for name, ver in pkg.get(section, {}).items():
             if name in BLOCKED_ALL:
-                found.append(f"[{path}] {name} (全バージョン危険)")
+                found_danger.append(f"[{path}] {name} (全バージョン危険)")
+                continue
             if name in BLOCKED_EXACT:
                 clean_ver = ver.lstrip("^~>=< ")
-                if clean_ver in BLOCKED_EXACT[name]:
-                    found.append(f"[{path}] {name}@{clean_ver} (危険バージョン)")
+                _check_entry(path, name, clean_ver)
 
 
 def check_package_lock(path):
@@ -153,10 +176,22 @@ else:
     check_pnpm_lock("pnpm-lock.yaml")
     check_installed()
 
-if found:
-    for f in sorted(set(found)):
+# 結果出力
+# exit 0: 安全、exit 1: 危険（ブロック）、exit 2: 未確認あり（シェルで対話）
+exit_code = 0
+
+if found_danger:
+    for f in sorted(set(found_danger)):
         print(f"DANGER: {f}")
-    sys.exit(1)
-else:
+    exit_code = 1
+
+if found_warn:
+    for w in sorted(set(found_warn)):
+        print(f"WARN: {w}")
+    if exit_code == 0:
+        exit_code = 2  # DANGER がなく WARN だけの場合
+
+if not found_danger and not found_warn:
     print("OK")
-    sys.exit(0)
+
+sys.exit(exit_code)

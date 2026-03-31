@@ -1,0 +1,136 @@
+{
+  "exact": {
+    "axios": {
+      "dangerous": [
+        "1.14.1",
+        "0.30.4"
+      ],
+      "safe": [
+        "1.14.0",
+        "1.13.1",
+        "1.13.0",
+        "1.12.2",
+        "0.30.3",
+        "0.30.2"
+      ],
+      "type": "RAT",
+      "added": "2026-03-31",
+      "source": "https://socket.dev/blog/axios-malware-2026"
+    },
+    "@solana/web3.js": {
+      "dangerous": [
+        "1.95.6",
+        "1.95.7"
+      ],
+      "safe": [
+        "1.95.8",
+        "1.95.5",
+        "1.95.4"
+      ],
+      "type": "秘密鍵窃取",
+      "added": "2026-03-31",
+      "source": "https://github.com/advisories"
+    },
+    "@lottiefiles/lottie-player": {
+      "dangerous": [
+        "2.0.8"
+      ],
+      "safe": [
+        "2.0.9",
+        "2.0.7"
+      ],
+      "type": "Web3ウォレット窃取",
+      "added": "2026-03-31",
+      "source": "https://blog.phylum.io"
+    }
+  },
+  "all": {
+    "axois": {
+      "impersonates": "axios",
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    },
+    "axi0s": {
+      "impersonates": "axios",
+      "type": "マルウェア",
+      "added": "2026-03-31"
+    },
+    "loadsh": {
+      "impersonates": "lodash",
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    },
+    "expres": {
+      "impersonates": "express",
+      "type": "バックドア",
+      "added": "2026-03-31"
+    },
+    "reactjs-core": {
+      "impersonates": "react",
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    },
+    "lottie-plyer": {
+      "impersonates": "lottie-player",
+      "type": "ウォレット窃取",
+      "added": "2026-03-31"
+    },
+    "solana-transaction-toolkit": {
+      "type": "ウォレット窃取",
+      "added": "2026-03-31"
+    },
+    "solana-stable-web-huks": {
+      "type": "ウォレット窃取",
+      "added": "2026-03-31"
+    },
+    "crypto-encrypt-ts": {
+      "impersonates": "CryptoJS",
+      "type": "情報窃取+マイナー",
+      "added": "2026-03-31"
+    },
+    "node-hide-console-windows": {
+      "impersonates": "node-hide-console-window",
+      "type": "RAT+マイナー",
+      "added": "2026-03-31"
+    },
+    "eslint-plugin-prettier-format": {
+      "impersonates": "ESLintプラグイン",
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    },
+    "prettier-plugin-xml2": {
+      "impersonates": "prettierプラグイン",
+      "type": "マルウェア",
+      "added": "2026-03-31"
+    },
+    "jest-cov-reporter": {
+      "impersonates": "Jestカバレッジ",
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    },
+    "event-handle-package": {
+      "type": "RAT（北朝鮮系）",
+      "added": "2026-03-31"
+    },
+    "yolowide": {
+      "type": "情報窃取（北朝鮮系）",
+      "added": "2026-03-31"
+    },
+    "icloud-cod": {
+      "type": "スパイウェア",
+      "added": "2026-03-31"
+    },
+    "warbeast2000": {
+      "type": "SSH鍵窃取",
+      "added": "2026-03-31"
+    },
+    "kodaborat": {
+      "type": "SSH鍵窃取",
+      "added": "2026-03-31"
+    },
+    "bb-templates": {
+      "type": "情報窃取",
+      "added": "2026-03-31"
+    }
+  }
+}

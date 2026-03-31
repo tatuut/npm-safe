@@ -1,21 +1,29 @@
 # npm のセキュリティラッパー（PowerShell版）
 # 使い方: Set-Alias npm C:\Users\$env:USERNAME\bin\npm-safe.ps1 を $PROFILE に追加
-#
-# 3段階チェック:
-#   1. CLI引数のパッケージ名を直接チェック
-#   2. --package-lock-only でロックファイルだけ更新
-#   3. 更新されたロックファイルで推移的依存をチェック
 
 $CheckScript = Join-Path $PSScriptRoot "npm-safe-check.py"
 
-function Show-Danger($output) {
+function Show-Results($output) {
     Write-Host ""
     foreach ($line in $output -split "`n") {
         if ($line -match "^DANGER: (.+)$") {
             Write-Host "  ⚠ $($Matches[1])" -ForegroundColor Red
+        } elseif ($line -match "^WARN: (.+)$") {
+            Write-Host "  ⚠ $($Matches[1])" -ForegroundColor Yellow
         }
     }
     Write-Host ""
+}
+
+function Confirm-Warn($output) {
+    if ($output -match "^WARN:") {
+        Show-Results $output
+        $answer = Read-Host "未確認バージョンが含まれています。インストールしますか？ [y/N]"
+        if ($answer -ne "y" -and $answer -ne "Y") {
+            Write-Host "npm install を中止しました。" -ForegroundColor Red
+            exit 1
+        }
+    }
 }
 
 if ($args[0] -in @("install", "i", "add", "ci")) {
@@ -36,19 +44,21 @@ if ($args[0] -in @("install", "i", "add", "ci")) {
     if ($pkgArgs.Count -gt 0) {
         $result = & python $CheckScript --check-args @pkgArgs 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            Show-Danger $result
+            Show-Results $result
             Write-Host "npm $subcmd を中止しました。" -ForegroundColor Red
             exit 1
         }
+        Confirm-Warn $result
     }
 
     # --- Step 2: 既存の package.json チェック ---
     $result = & python $CheckScript 2>&1 | Out-String
     if ($LASTEXITCODE -ne 0) {
-        Show-Danger $result
+        Show-Results $result
         Write-Host "npm $subcmd を中止しました。" -ForegroundColor Red
         exit 1
     }
+    Confirm-Warn $result
 
     # --- Step 3: 推移的依存チェック（ci 以外） ---
     if ($subcmd -ne "ci") {
@@ -63,7 +73,7 @@ if ($args[0] -in @("install", "i", "add", "ci")) {
 
         $result = & python $CheckScript 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
-            Show-Danger $result
+            Show-Results $result
             if ($lockBackup) {
                 Copy-Item $lockBackup "package-lock.json"
                 Remove-Item $lockBackup
@@ -74,6 +84,7 @@ if ($args[0] -in @("install", "i", "add", "ci")) {
             exit 1
         }
 
+        Confirm-Warn $result
         if ($lockBackup) { Remove-Item $lockBackup }
     }
 
