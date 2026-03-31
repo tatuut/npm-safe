@@ -15,10 +15,9 @@
 | **npm** | package-lock.json | ✓ `--package-lock-only` |
 | **pnpm** | pnpm-lock.yaml | ✓ `--lockfile-only` |
 | **bun** | bun.lock (JSONC, Bun 1.2+) | ✓ `--lockfile-only` |
-| **yarn** (Berry v2+) | yarn.lock | ✓ `--mode update-lockfile` |
-| **yarn** (Classic v1) | yarn.lock | ✗（既存lockfileのみ） |
+| **yarn** (v2+) | yarn.lock | ✓ `--mode update-lockfile` |
 
-> yarn v1 はlockfile-onlyモードがないため、推移的依存の事前チェックはスキップされる。既存のyarn.lockはチェックされる。
+> **yarn Classic (v1) は非対応。** v1 にはlockfile-onlyモードがなく、推移的依存の事前チェックが不可能なため安全性を保証できない。yarn v1 ユーザーは v4 (Berry) への移行を推奨。
 
 ## 何をチェックするか
 
@@ -64,7 +63,7 @@
 
 - **bash** (Git Bash, WSL, macOS/Linux) または **PowerShell**
 - **Python 3.8+**
-- **npm** / **pnpm** / **bun** / **yarn** のいずれか
+- **npm** / **pnpm** / **bun** / **yarn** (v2+) のいずれか（yarn Classic v1 は非対応）
 
 サードパーティパッケージのインストールは不要。Python 標準ライブラリのみ使用。
 
